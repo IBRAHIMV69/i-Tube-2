@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favorite Videos</title>
+    <style>
+        :root {
+            --button-bg-color: #ff4500;
+            --button-hover-color: #e63e00;
+            --button-text-color: #ffffff;
+            --button-font-size: 0.7rem;
+            --button-padding: 3px 45px;
+            --star-color: #ffd700; /* Gold color for the star */
+            --star-hover-color: #ffa500; /* Orange color for hover */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #121212, #121212);
+            color: #fff;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: #121212;
+            padding: 10px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            color: #000;
+        font-size: 0.8rem;
+        }
+
+        .search-bar {
+            margin-top: 10px
+        }
+
+        .search-bar input {
+            width: 90%;
+            max-width: 300px;
+            padding: 10px;
+            font-size: 0.7rem;
+            border: 1px solid #000;
+            border-radius: 8px;
+        }
+        .description {
+            font-size: 0.2rem;
+            margin-top: 10px;
+            color: #ccc;
+        }
+
+        .cloud-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .cloud-item {
+            position: relative;
+            text-align: center;
+            width: 150px;
+        }
+
+        .cloud-item img {
+            width: 155px;
+            height: 230px;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .cloud-item img:hover {
+            transform: scale(1.05);
+        }
+
+        .cloud-item p {
+            margin-top: 8px;
+            font-size: 0.6rem;
+            color: #fff;
+        }
+
+        .cloud-item button {
+            margin: 10px auto 0 auto;
+            padding: var(--button-padding);
+            border: none;
+            border-radius: 4px;
+            background: var(--button-bg-color);
+            color: var(--button-text-color);
+            cursor: pointer;
+            font-size: var(--button-font-size);
+            transition: background 0.3s;
+            display: block;
+            text-align: center;
+        }
+
+        .cloud-item button:hover {
+            background: var(--button-hover-color);
+        }
+        .favorites-title {
+            margin: 20px 0 10px 20px;
+            font-size: 0.6rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .favorite-star {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 2rem;
+            color: #FFF;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .favorite-star:hover {
+            color: #FF0000;
+        }
+
+        .favorites-carousel {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            padding: 10px;
+            background: #000;
+            margin-top: 20px;
+        }
+
+        .favorites-carousel::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .favorites-carousel::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 4px;
+        }
+
+        .favorites-carousel img {
+            width: 120px;
+            height: 170px;
+            border-radius: 4px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .video-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .video-modal.active {
+            display: flex;
+        }
+
+        .video-modal iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .video-modal .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff4500;
+            color: white;
+            border: none;
+            padding: 10px;
+            font-size: 0.5rem;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .video-modal .close-button:hover {
+            background: #ff6a00;
+        }
+
+        .no-results {
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+            font-size: 1rem;
+        }
+        .url-button {
+            padding: 0.3px 20px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(135deg, #ff6a00, #ee0979);
+            color: #fff;
+            cursor: pointer;
+            margin: 8px;
+            text-decoration: none;
+            text-align: center;
+        }
+        .url-button:hover {
+            background: linear-gradient(135deg, #ff6a00, #ee0979);
+            
+            }
+        .link-button {
+            padding: 0.3px 20px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(135deg, #fff, #fff);
+            color: #000;
+            cursor: pointer;
+            margin: 8px;
+            text-decoration: none;
+            text-align: center;
+        }
+        .link-button:hover {
+            background: linear-gradient(135deg, #ff6a00, #ee0979);
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a href="https://drive.google.com/file/d/15TmwkJd8aAoe8op04SNPn5Fd58g4B-5q/view?usp=drivesdk" target="_blank" class="url-button">Open app</a></h1>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="🔍  Search..." />
+        </div>
+    </header>
+    <div class="favorites-carousel" id="favoritesCarousel"></div>
+    <div class="favorites-title">PIN YOUR FAVORITE MOVIE BY CLICKING LOVE 🤍</div>
+    <div class="cloud-container" id="cloudContainer"></div>
+    <p class="no-results" id="noResults">No results found</p>
+    
+
+    <div class="video-modal" id="videoModal">
+        <button class="close-button" id="closeModal">Close</button>
+        <iframe id="videoFrame" src="" allowfullscreen></iframe>
+    </div>
+
+    <script>
+        const videos = [
+            { 
+                id: 1,
+                title: "APOCALYPSE 2 - FULL", 
+                thumbnail: "https://bit.ly/4gCtC1L", 
+                link: "https://www.youtube.com/embed/ZG6yG8PTmfY",
+                commentsUrl: "https://youtube.com/@itube-d1s?si=KXHDjPMVkkxjzrWE",
+                commentsButtonTitle: ""
+            },
+            { 
+                id: 2,
+                title: "JACK THE GIANT SLAYER", 
+                thumbnail: "https://bit.ly/4gDe4dm", 
+                link: "https://www.youtube.com/embed/dLWTkLftll0",
+                commentsUrl: "https://youtube.com/@itube-d1s?si=KXHDjPMVkkxjzrWE",
+                commentsButtonTitle: ""
+            },
+            { 
+                id: 3,
+                title: "GOD OF WAR - FULL", 
+                thumbnail: "https://bit.ly/405kXOj", 
+                link: "https://www.youtube.com/embed/CumW3IY1mMg",
+                commentsUrl: "https://youtube.com/@itube-d1s?si=KXHDjPMVkkxjzrWE",
+                commentsButtonTitle: ""
+            },
+            { 
+                id: 4,
+                title: "VIKING HUNTRESS", 
+                thumbnail: "https://bit.ly/4fwBQqK", 
+                link: "https://www.youtube.com/embed/BjkncLAZu80",
+                commentsUrl: "https://youtube.com/@itube-d1s?si=KXHDjPMVkkxjzrWE",
+                commentsButtonTitle: ""
+            },
+            { 
+                id: 5,
+                title: "JURASSIC TRIANGLE", 
+                thumbnail: "https://bit.ly/3ZLSaxS", 
+                link: "https://www.youtube.com/embed/UPjyNg1mKAM",
+                commentsUrl: "https://youtube.com/@itube-d1s?si=KXHDjPMVkkxjzrWE",
+                commentsButtonTitle: ""
+            },
+            { 
+                id: 6,
+                title: "GUNS OF EDEN - FULL", 
+                thumbnail: "https://bit.ly/3VRBV13", 
+                link: "https://www.youtube.com/embed/3_i60BLtN_s",
+                commentsUrl: "https://youtube.com/@itube-d1s?si=KXHDjPMVkkxjzrWE",
+                commentsButtonTitle: ""
+            },
+            { 
+                id: 7,
+                title: "KNIGHT OF THE DEAD", 
+                thumbnail: "https://bit.ly/3BxGSW6", 
+                link: "https://www.youtube.com/embed/siFLpeqOWDQ",
+                commentsUrl: "https://youtube.com/@itube-d1s?si=KXHDjPMVkkxjzrWE",
+                commentsButtonTitle: ""
+            },
+            { 
+                id: 8,
+                title: "ALIEN INVASION", 
+                thumbnail: "https://bit.ly/3VSO1am", 
+                link: "https://www.youtube.com/embed/iTNyJse9fdk",
+                commentsUrl: "https://youtube.com/@itube-d1s?si=KXHDjPMVkkxjzrWE",
+                commentsButtonTitle: ""
+            },
+            { 
+                id: 3,
+                title: "GOD OF WAR - FULL", 
+                thumbnail: "https://bit.ly/405kXOj", 
+                link: "https://www.youtube.com/embed/CumW3IY1mMg",
+                commentsUrl: "https://youtube.com/@itube-d1s?si=KXHDjPMVkkxjzrWE",
+                commentsButtonTitle: ""
+            },
+            { 
+                id: 4,
+                title: "VIKING HUNTRESS", 
+                thumbnail: "https://bit.ly/4fwBQqK", 
+                link: "https://www.youtube.com/embed/BjkncLAZu80",
+                commentsUrl: "https://youtube.com/@itube-d1s?si=KXHDjPMVkkxjzrWE",
+                commentsButtonTitle: ""
+            },
+            { 
+                id: 5,
+                title: "JACK THE GIANT SLAYER", 
+                thumbnail: "https://bit.ly/4gDe4dm", 
+                link: "https://www.youtube.com/embed/dLWTkLftll0",
+                commentsUrl: "https://youtube.com/@itube-d1s?si=KXHDjPMVkkxjzrWE",
+                commentsButtonTitle: ""
+            },
+            { 
+                id: 6,
+                title: "GOD OF WAR - FULL", 
+                thumbnail: "https://bit.ly/405kXOj", 
+                link: "https://www.youtube.com/embed/CumW3IY1mMg",
+                commentsUrl: "https://youtube.com/@itube-d1s?si=KXHDjPMVkkxjzrWE",
+                commentsButtonTitle: ""
+            },
+            
+        ];
+
+        const cloudContainer = document.getElementById('cloudContainer');
+        const favoritesCarousel = document.getElementById('favoritesCarousel');
+        const searchInput = document.getElementById('searchInput');
+        const noResults = document.getElementById('noResults');
+        const videoModal = document.getElementById('videoModal');
+        const videoFrame = document.getElementById('videoFrame');
+        const closeModal = document.getElementById('closeModal');
+
+        let favoriteVideos = JSON.parse(localStorage.getItem('favoriteVideos')) || [];
+
+        function displayVideos(query) {
+            cloudContainer.innerHTML = '';
+            let results = videos.filter(video => video.title.toLowerCase().includes(query.toLowerCase()));
+
+            if (results.length === 0) {
+                noResults.style.display = 'block';
+            } else {
+                noResults.style.display = 'none';
+            }
+
+            results.forEach((video, index) => {
+                const videoItem = document.createElement('div');
+                videoItem.className = 'cloud-item';
+
+                videoItem.innerHTML = `
+                    <img src="${video.thumbnail}" alt="${video.title}" onclick="openVideo('${video.link}')" />
+                    <p>${video.title}</p>
+                    <span class="favorite-star" onclick="toggleFavorite(${index})">&#9829</span>
+                `;
+                
+                
+
+                if (video.commentsButtonTitle) {
+                    const button = document.createElement('button');
+                    button.textContent = video.commentsButtonTitle;
+                    button.onclick = () => window.location.href = video.commentsUrl;
+                    videoItem.appendChild(button);
+                }
+
+                cloudContainer.appendChild(videoItem);
+            });
+        }
+
+        function displayFavorites() {
+            favoritesCarousel.innerHTML = '';
+            favoriteVideos.forEach((video) => {
+                const favoriteItem = document.createElement('img');
+                favoriteItem.src = video.thumbnail;
+                favoriteItem.alt = video.title;
+                favoriteItem.onclick = () => openVideo(video.link);
+                favoritesCarousel.appendChild(favoriteItem);
+            });
+        }
+
+        function toggleFavorite(index) {
+            const video = videos[index];
+            const exists = favoriteVideos.find(fav => fav.title === video.title);
+            if (exists) {
+                // Remove video from favorites
+                favoriteVideos = favoriteVideos.filter(fav => fav.title !== video.title);
+            } else {
+                // Add video to favorites
+                favoriteVideos.unshift(video); // Add to the front of the array (new favorites appear on the left)
+            }
+            localStorage.setItem('favoriteVideos', JSON.stringify(favoriteVideos));
+            displayFavorites();
+        }
+
+        function openVideo(link) {
+            videoFrame.src = link;
+            videoModal.classList.add('active');
+        }
+
+        closeModal.addEventListener('click', () => {
+            videoFrame.src = '';
+            videoModal.classList.remove('active');
+        });
+
+        searchInput.addEventListener('input', (e) => {
+    const query = e.target.value;
+    displayVideos(query);
+
+    // Hide favorites if search query is not empty
+    if (query.trim() !== '') {
+        favoritesCarousel.style.display = 'none';
+    } else {
+        favoritesCarousel.style.display = 'flex'; // Show favorites again when search is cleared
+    }
+});
+
+        // Initial Load
+        displayVideos('');
+        displayFavorites();
+    </script>
+</body>
+</html>
